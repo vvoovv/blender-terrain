@@ -1,9 +1,11 @@
 # blender-srtm
 Importer of digital elevation model data from files in the SRTM format (.hgt) for Blender.
 
-[Documentation](https://github.com/vvoovv/blender-srtm/wiki/Documentation)
-
 ![](https://raw.githubusercontent.com/wiki/vvoovv/blender-srtm/images/import_srtm_03.png)
+
+* [Documentation](https://github.com/vvoovv/blender-srtm/wiki/Documentation)
+* blenderartists.org: [thread](http://blenderartists.org/forum/showthread.php?334510-Addon-Import-SRTM-terrain-(-hgt))
+* twitter: [@prokitektura](https://twitter.com/prokitektura)
 
 ## Donations
 If you find the addons useful, please consider making a donation:
