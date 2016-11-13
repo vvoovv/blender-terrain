@@ -189,7 +189,7 @@ class ImportSrtm(bpy.types.Operator, ImportHelper):
         mesh.from_pydata(verts, [], indices)
         mesh.update()
         obj = bpy.data.objects.new("SRTM", mesh)
-        # set custom parameter "latitude" and "longitude" to the active scene
+        # set custom parameter "lat" and "lon" to the active scene
         if not _projection:
             scene["lat"] = projection.lat
             scene["lon"] = projection.lon
@@ -210,7 +210,7 @@ class ImportSrtm(bpy.types.Operator, ImportHelper):
         row.prop(self, "ignoreGeoreferencing")
         
         row = layout.row()
-        if self.useSpecificExtent or self.ignoreGeoreferencing or not ("latitude" in context.scene and "longitude" in context.scene):
+        if self.useSpecificExtent or self.ignoreGeoreferencing or not ("lat" in context.scene and "lon" in context.scene):
             row.enabled = False
         row.prop(self, "useSelectionAsExtent")
         
