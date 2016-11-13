@@ -132,8 +132,8 @@ class ImportSrtm(bpy.types.Operator, ImportHelper):
     def execute(self, context):
         scene = context.scene
         projection = None
-        if "latitude" in scene and "longitude" in scene and not self.ignoreGeoreferencing:
-            projection = TransverseMercator(lat=scene["latitude"], lon=scene["longitude"])
+        if "lat" in scene and "lon" in scene and not self.ignoreGeoreferencing:
+            projection = TransverseMercator(lat=scene["lat"], lon=scene["lon"])
         if self.useSelectionAsExtent:
             bbox = getSelectionBoundingBox(context)
             if not bbox or bbox["xmin"]>=bbox["xmax"] or bbox["ymin"]>=bbox["ymax"]:
@@ -191,8 +191,8 @@ class ImportSrtm(bpy.types.Operator, ImportHelper):
         obj = bpy.data.objects.new("SRTM", mesh)
         # set custom parameter "latitude" and "longitude" to the active scene
         if not _projection:
-            scene["latitude"] = projection.lat
-            scene["longitude"] = projection.lon
+            scene["lat"] = projection.lat
+            scene["lon"] = projection.lon
         bpy.context.scene.objects.link(obj)
         
         return {"FINISHED"}
