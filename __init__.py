@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Import SRTM (.hgt)",
     "author": "Vladimir Elistratov <vladimir.elistratov@gmail.com>",
-    "version": (1, 0, 2),
+    "version": (1, 0, 3),
     "blender": (2, 7, 8),
     "location": "File > Import > SRTM (.hgt)",
     "description" : "Import digital elevation model data from files in the SRTM format (.hgt)",
@@ -77,56 +77,65 @@ class ImportSrtm(bpy.types.Operator, ImportHelper):
 
     filter_glob = bpy.props.StringProperty(
         default="*.hgt",
-        options={"HIDDEN"},
+        options={"HIDDEN"}
+    )
+    
+    # SRTM3 data are sampled at either 3 arc-second and contain 1201 lines and 1201 samples
+    # or 1 arc-second and contain 3601 lines and 3601 samples
+    resolution = bpy.props.EnumProperty(
+        name="Resolution",
+        items=(("1", "1 arc-second", "1 arc-second"), ("3", "3 arc-second", "3 arc-second")),
+        description="Spation resolution",
+        default="1"
     )
 
     ignoreGeoreferencing = bpy.props.BoolProperty(
         name="Ignore existing georeferencing",
         description="Ignore existing georeferencing and make a new one",
-        default=False,
+        default=False
     )
     
     useSelectionAsExtent = bpy.props.BoolProperty(
         name="Use selected objects as extent",
         description="Use selected objects as extent",
-        default=False,
+        default=False
     )
     
     primitiveType = bpy.props.EnumProperty(
         name="Mesh primitive type: quad or triangle",
         items=(("quad","quad","quad"),("triangle","triangle","triangle")),
         description="Primitive type used for the terrain mesh: quad or triangle",
-        default="quad",
+        default="quad"
     )
     
     useSpecificExtent = bpy.props.BoolProperty(
         name="Use manually set extent",
         description="Use specific extent by setting min lat, max lat, min lon, max lon",
-        default=False,
+        default=True
     )
     
     minLat = bpy.props.FloatProperty(
         name="min lat",
         description="Minimum latitude of the imported extent",
-        default=0,
+        default=0
     )
 
     maxLat = bpy.props.FloatProperty(
         name="max lat",
         description="Maximum latitude of the imported extent",
-        default=0,
+        default=0
     )
 
     minLon = bpy.props.FloatProperty(
         name="min lon",
         description="Minimum longitude of the imported extent",
-        default=0,
+        default=0
     )
 
     maxLon = bpy.props.FloatProperty(
         name="max lon",
         description="Maximum longitude of the imported extent",
-        default=0,
+        default=0
     )
 
     def execute(self, context):
@@ -173,7 +182,8 @@ class ImportSrtm(bpy.types.Operator, ImportHelper):
             maxLon=maxLon,
             projection=projection,
             srtmDir=os.path.dirname(self.filepath), # directory for the .hgt files
-            primitiveType = self.primitiveType
+            primitiveType = self.primitiveType,
+            size = 3600//int(self.resolution)
         )
         missingSrtmFiles = srtm.getMissingSrtmFiles()
         if missingSrtmFiles:
@@ -206,17 +216,7 @@ class ImportSrtm(bpy.types.Operator, ImportHelper):
         )
         
         row = layout.row()
-        if self.useSelectionAsExtent: row.enabled = False
-        row.prop(self, "ignoreGeoreferencing")
-        
-        row = layout.row()
-        if self.useSpecificExtent or self.ignoreGeoreferencing or not ("lat" in context.scene and "lon" in context.scene):
-            row.enabled = False
-        row.prop(self, "useSelectionAsExtent")
-        
-        layout.label("Mesh primitive type:")
-        row = layout.row()
-        row.prop(self, "primitiveType", expand=True)
+        row.prop(self, "resolution")
         
         row = layout.row()
         if self.useSelectionAsExtent: row.enabled = False
@@ -229,11 +229,22 @@ class ImportSrtm(bpy.types.Operator, ImportHelper):
             row.prop(self, "minLon")
             row.prop(self, "maxLon")
             box.prop(self, "minLat")
+        
+        row = layout.row()
+        if self.useSpecificExtent or self.ignoreGeoreferencing or not ("lat" in context.scene and "lon" in context.scene):
+            row.enabled = False
+        row.prop(self, "useSelectionAsExtent")
+        
+        layout.label("Mesh primitive type:")
+        row = layout.row()
+        row.prop(self, "primitiveType", expand=True)
+        
+        row = layout.row()
+        if self.useSelectionAsExtent: row.enabled = False
+        row.prop(self, "ignoreGeoreferencing")
+
 
 class Srtm:
-
-    # SRTM3 data are sampled at three arc-seconds and contain 1201 lines and 1201 samples
-    size = 1200
 
     voidValue = -32768
 
