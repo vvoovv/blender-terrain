@@ -215,8 +215,8 @@ class ImportSrtm(bpy.types.Operator, ImportHelper):
             self.bl_label
         )
         
-        row = layout.row()
-        row.prop(self, "resolution")
+        #row = layout.row()
+        #row.prop(self, "resolution")
         
         row = layout.row()
         if self.useSelectionAsExtent: row.enabled = False
@@ -230,14 +230,18 @@ class ImportSrtm(bpy.types.Operator, ImportHelper):
             row.prop(self, "maxLon")
             box.prop(self, "minLat")
         
+        layout.separator()
+        
         row = layout.row()
         if self.useSpecificExtent or self.ignoreGeoreferencing or not ("lat" in context.scene and "lon" in context.scene):
             row.enabled = False
         row.prop(self, "useSelectionAsExtent")
         
-        layout.label("Mesh primitive type:")
-        row = layout.row()
-        row.prop(self, "primitiveType", expand=True)
+        #layout.label("Mesh primitive type:")
+        #row = layout.row()
+        #row.prop(self, "primitiveType", expand=True)
+        
+        layout.separator()
         
         row = layout.row()
         if self.useSelectionAsExtent: row.enabled = False
