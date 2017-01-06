@@ -187,11 +187,12 @@ class ImportSrtm(bpy.types.Operator, ImportHelper):
         )
         missingSrtmFiles = srtm.getMissingSrtmFiles()
         if missingSrtmFiles:
-            for missingFile in missingSrtmFiles:
+            for missingPath in missingSrtmFiles:
+                missingFile = os.path.basename(missingPath)
                 self.report(
                     {"ERROR"},
                     "SRTM file %s is missing. Download it from https://s3.amazonaws.com/elevation-tiles-prod/skadi/%s/%s.gz" %\
-                    (os.path.join(srtm.srtmDir, missingFile), missingFile[:3], missingFile)
+                    (missingPath, missingFile[:3], missingFile)
                 )
             return {"FINISHED"}
         verts = []
@@ -382,11 +383,11 @@ class Srtm:
             # remembering ySize
             prevYsize = y2-y1
 
-    def getSrtmFileName(self, lat, lon, fullPath=True):
+    def getSrtmFileName(self, lat, lon):
         prefixLat = "N" if lat>= 0 else "S"
         prefixLon = "E" if lon>= 0 else "W"
         fileName = "{}{:02d}{}{:03d}.hgt".format(prefixLat, abs(lat), prefixLon, abs(lon))
-        return os.path.join(self.srtmDir, fileName) if fullPath else fileName
+        return os.path.join(self.srtmDir, fileName)
 
     def getMissingSrtmFiles(self):
         """
@@ -402,7 +403,7 @@ class Srtm:
             for lonInterval in lonIntervals:
                 # longitude of the lower-left corner of the SRTM tile
                 _lon = math.floor(lonInterval[0])
-                srtmFileName = self.getSrtmFileName(_lat, _lon, False)
+                srtmFileName = self.getSrtmFileName(_lat, _lon)
                 # check if the SRTM file exists
                 if not os.path.exists(srtmFileName):
                     missingFiles.append(srtmFileName)
