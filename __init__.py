@@ -1,13 +1,13 @@
 bl_info = {
-    "name": "Import SRTM (.hgt)",
+    "name": "Import Terrain (.hgt)",
     "author": "Vladimir Elistratov <vladimir.elistratov@gmail.com>",
     "version": (1, 0, 3),
     "blender": (2, 7, 8),
-    "location": "File > Import > SRTM (.hgt)",
-    "description" : "Import digital elevation model data from files in the SRTM format (.hgt)",
+    "location": "File > Import > Terrain (.hgt)",
+    "description" : "Import real world terrain data from files in the SRTM format (.hgt)",
     "warning": "",
-    "wiki_url": "https://github.com/vvoovv/blender-srtm/wiki/Documentation",
-    "tracker_url": "https://github.com/vvoovv/blender-srtm/issues",
+    "wiki_url": "https://github.com/vvoovv/blender-terrain/wiki/Documentation",
+    "tracker_url": "https://github.com/vvoovv/blender-terrain/issues",
     "support": "COMMUNITY",
     "category": "Import-Export",
 }
@@ -66,10 +66,10 @@ def getSelectionBoundingBox(context):
     return {"xmin": xmin, "ymin": ymin, "xmax": xmax, "ymax": ymax}
 
 
-class ImportSrtm(bpy.types.Operator, ImportHelper):
+class ImportTerrain(bpy.types.Operator, ImportHelper):
     """Import digital elevation model data from files in the SRTM format (.hgt)"""
-    bl_idname = "import_scene.srtm"  # important since its how bpy.ops.import_scene.srtm is constructed
-    bl_label = "Import SRTM"
+    bl_idname = "import_scene.terrain"  # important since its how bpy.ops.import_scene.terrain is constructed
+    bl_label = "Import Terrain"
     bl_options = {"UNDO","PRESET"}
 
     # ImportHelper mixin class uses this
@@ -160,7 +160,7 @@ class ImportSrtm(bpy.types.Operator, ImportHelper):
             # use extent of the self.filepath (a single .hgt file)
             srtmFileName = os.path.basename(self.filepath)
             if not srtmFileName:
-                self.report({"ERROR"}, "A .hgt file with SRTM data wasn't specified")
+                self.report({"ERROR"}, "A .hgt file with terrain data wasn't specified")
                 return {"FINISHED"}
             minLat = int(srtmFileName[1:3])
             if srtmFileName[0]=="S":
@@ -191,7 +191,7 @@ class ImportSrtm(bpy.types.Operator, ImportHelper):
                 missingFile = os.path.basename(missingPath)
                 self.report(
                     {"ERROR"},
-                    "SRTM file %s is missing. Download it from https://s3.amazonaws.com/elevation-tiles-prod/skadi/%s/%s.gz" %\
+                    "Terrain file %s is missing. Download it from https://s3.amazonaws.com/elevation-tiles-prod/skadi/%s/%s.gz" %\
                     (missingPath, missingFile[:3], missingFile)
                 )
             return {"FINISHED"}
@@ -200,10 +200,10 @@ class ImportSrtm(bpy.types.Operator, ImportHelper):
         srtm.build(verts, indices)
         
         # create a mesh object in Blender
-        mesh = bpy.data.meshes.new("SRTM")
+        mesh = bpy.data.meshes.new("Terrain")
         mesh.from_pydata(verts, [], indices)
         mesh.update()
-        obj = bpy.data.objects.new("SRTM", mesh)
+        obj = bpy.data.objects.new("Terrain", mesh)
         # set custom parameter "lat" and "lon" to the active scene
         if not _projection:
             scene["lat"] = projection.lat
@@ -412,14 +412,14 @@ class Srtm:
 
 # Only needed if you want to add into a dynamic menu
 def menu_func_import(self, context):
-    self.layout.operator(ImportSrtm.bl_idname, text="SRTM (.hgt)")
+    self.layout.operator(ImportTerrain.bl_idname, text="Terrain (.hgt)")
 
 def register():
-    bpy.utils.register_class(ImportSrtm)
+    bpy.utils.register_class(ImportTerrain)
     bpy.utils.register_class(Donate)
     bpy.types.INFO_MT_file_import.append(menu_func_import)
 
 def unregister():
-    bpy.utils.unregister_class(ImportSrtm)
+    bpy.utils.unregister_class(ImportTerrain)
     bpy.utils.unregister_class(Donate)
     bpy.types.INFO_MT_file_import.remove(menu_func_import)
