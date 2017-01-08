@@ -1,5 +1,5 @@
 # blender-srtm
-Importer of digital elevation model data from files in the SRTM format (.hgt) for Blender.
+The addon for Blender imports real world terrain data with global coverage and the resolution about 30 meter.
 
 ![](https://raw.githubusercontent.com/wiki/vvoovv/blender-srtm/images/import_srtm_03.png)
 
