@@ -4,7 +4,7 @@ The addon for Blender imports real world terrain data with global coverage and t
 [![](https://raw.githubusercontent.com/wiki/vvoovv/blender-srtm/images/import_srtm_03.png)](https://github.com/vvoovv/blender-srtm/wiki/Documentation)
 
 * [Documentation](https://github.com/vvoovv/blender-srtm/wiki/Documentation)
-* blenderartists.org: [thread](http://blenderartists.org/forum/showthread.php?334510-Addon-Import-SRTM-terrain-(-hgt))
+* blenderartists.org: [thread](https://blenderartists.org/forum/showthread.php?334510-Addon-Import-real-world-terrain-with-global-coverage)
 * twitter: [@prokitektura](https://twitter.com/prokitektura)
 
 ## Donations
