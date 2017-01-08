@@ -1,5 +1,5 @@
 # blender-terrain
-The addon for Blender imports real world terrain data with global coverage and the resolution about 30 meter.
+The addon for Blender imports real world terrain data with global coverage and the resolution about 30 meter in the SRTM format (.hgt).
 
 [![](https://raw.githubusercontent.com/wiki/vvoovv/blender-srtm/images/import_srtm_03.png)](https://github.com/vvoovv/blender-srtm/wiki/Documentation)
 
