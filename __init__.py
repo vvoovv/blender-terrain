@@ -234,11 +234,18 @@ class ImportTerrain(bpy.types.Operator, ImportHelper):
         
         if self.useSpecificExtent:
             box = layout.box()
-            box.prop(self, "maxLat")
+            
+            split = box.split(percentage=0.25)
+            split.label()
+            split.split(percentage=0.67).prop(self, "maxLat")
+            
             row = box.row()
             row.prop(self, "minLon")
             row.prop(self, "maxLon")
-            box.prop(self, "minLat")
+            
+            split = box.split(percentage=0.25)
+            split.label()
+            split.split(percentage=0.67).prop(self, "minLat")
         
         layout.separator()
         
