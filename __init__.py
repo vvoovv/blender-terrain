@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Import Terrain (.hgt)",
-    "author": "Vladimir Elistratov <vladimir.elistratov@gmail.com>",
-    "version": (1, 0, 3),
+    "author": "Vladimir Elistratov <prokitektura+support@gmail.com>",
+    "version": (1, 1, 0),
     "blender": (2, 7, 8),
     "location": "File > Import > Terrain (.hgt)",
     "description" : "Import real world terrain data from files in the SRTM format (.hgt)",
@@ -16,15 +16,18 @@ import os,sys
 
 def _checkPath():
     path = os.path.dirname(__file__)
-    if path not in sys.path:
-        sys.path.append(path)
+    if path in sys.path:
+        sys.path.remove(path)
+    # make <path> the first one to search for a module
+    sys.path.insert(0, path)
 _checkPath()
 
 import bpy, mathutils
 # ImportHelper is a helper class, defines filename and invoke() function which calls the file selector
 from bpy_extras.io_utils import ImportHelper
 
-import struct, math
+import struct, math, gzip
+from urllib import request
 
 from transverse_mercator import TransverseMercator
 from donate import Donate
@@ -73,10 +76,10 @@ class ImportTerrain(bpy.types.Operator, ImportHelper):
     bl_options = {"UNDO","PRESET"}
 
     # ImportHelper mixin class uses this
-    filename_ext = ".hgt"
+    filename_ext = ".hgt.gz"
 
     filter_glob = bpy.props.StringProperty(
-        default="*.hgt",
+        default="*.hgt.gz",
         options={"HIDDEN"}
     )
     
@@ -186,15 +189,17 @@ class ImportTerrain(bpy.types.Operator, ImportHelper):
             size = 3600//int(self.resolution)
         )
         missingSrtmFiles = srtm.getMissingSrtmFiles()
-        if missingSrtmFiles:
-            for missingPath in missingSrtmFiles:
-                missingFile = os.path.basename(missingPath)
-                self.report(
-                    {"ERROR"},
-                    "Terrain file %s is missing. Download it from https://s3.amazonaws.com/elevation-tiles-prod/skadi/%s/%s.gz" %\
-                    (missingPath, missingFile[:3], missingFile)
-                )
-            return {"FINISHED"}
+        # download missing SRTM files
+        for missingPath in missingSrtmFiles:
+            missingFile = os.path.basename(missingPath)
+            url = "https://s3.amazonaws.com/elevation-tiles-prod/skadi/%s/%s" % (missingFile[:3], missingFile)
+            print("Downloading the file from %s..." % url)
+            try:
+                request.urlretrieve(url, missingPath)
+            except Exception as e:
+                self.report({'ERROR'}, str(e))
+                return {'FINISHED'}
+            print("Saving the file to %s... Done." % missingPath)
         verts = []
         indices = []
         srtm.build(verts, indices)
@@ -312,7 +317,7 @@ class Srtm:
                 
                 srtmFileName = self.getSrtmFileName(_lat, _lon)
                 
-                with open(srtmFileName, "rb") as f:
+                with gzip.open(srtmFileName, "rb") as f:
                     for y in range(y2, y1-1, -1):
                         # set the file object position at y, x1
                         f.seek( 2*((self.size-y)*(self.size+1) + x1) )
@@ -386,7 +391,7 @@ class Srtm:
     def getSrtmFileName(self, lat, lon):
         prefixLat = "N" if lat>= 0 else "S"
         prefixLon = "E" if lon>= 0 else "W"
-        fileName = "{}{:02d}{}{:03d}.hgt".format(prefixLat, abs(lat), prefixLon, abs(lon))
+        fileName = "{}{:02d}{}{:03d}.hgt.gz".format(prefixLat, abs(lat), prefixLon, abs(lon))
         return os.path.join(self.srtmDir, fileName)
 
     def getMissingSrtmFiles(self):
@@ -407,7 +412,7 @@ class Srtm:
                 # check if the SRTM file exists
                 if not os.path.exists(srtmFileName):
                     missingFiles.append(srtmFileName)
-        return missingFiles if len(missingFiles)>0 else None
+        return missingFiles
 
 
 # Only needed if you want to add into a dynamic menu
