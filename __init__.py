@@ -403,8 +403,7 @@ class Srtm:
 
     def getMissingSrtmFiles(self):
         """
-        Returns None if all required SRTM files are found
-        Returns the list of missing SRTM file otherwise
+        Returns the list of missing SRTM files
         """
         latIntervals = self.latIntervals
         lonIntervals = self.lonIntervals
