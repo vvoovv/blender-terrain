@@ -3,7 +3,7 @@ The addon for Blender imports real world terrain data with global coverage and t
 
 Take look at the addon [blender-osm](https://gumroad.com/l/blender-osm). It provides one click download and import of OpenStreetMap and terrain for Blender. Buildings from OpenStreetMap are placed on the terrain automatically.
 
-[![](https://raw.githubusercontent.com/wiki/vvoovv/blender-srtm/images/import_srtm_03.png)](https://github.com/vvoovv/blender-srtm/wiki/Documentation)
+[![](https://raw.githubusercontent.com/wiki/vvoovv/blender-srtm/images/import_srtm_03.png)](https://github.com/vvoovv/blender-terrain/wiki/Documentation)
 
 * [Documentation](https://github.com/vvoovv/blender-terrain/wiki/Documentation)
 * blenderartists.org: [thread](https://blenderartists.org/forum/showthread.php?334510-Addon-Import-real-world-terrain-with-global-coverage)
