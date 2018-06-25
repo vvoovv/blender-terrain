@@ -2,7 +2,7 @@ bl_info = {
     "name": "Import Terrain (.hgt)",
     "author": "Vladimir Elistratov <prokitektura+support@gmail.com>",
     "version": (1, 1, 0),
-    "blender": (2, 7, 8),
+    "blender": (2, 7, 9),
     "location": "File > Import > Terrain (.hgt)",
     "description" : "Import real world terrain data from files in the SRTM format (.hgt)",
     "warning": "",
@@ -192,7 +192,7 @@ class ImportTerrain(bpy.types.Operator, ImportHelper):
         # download missing SRTM files
         for missingPath in missingSrtmFiles:
             missingFile = os.path.basename(missingPath)
-            url = "https://s3.amazonaws.com/elevation-tiles-prod/skadi/%s/%s" % (missingFile[:3], missingFile)
+            url = "http://s3.amazonaws.com/elevation-tiles-prod/skadi/%s/%s" % (missingFile[:3], missingFile)
             print("Downloading the file from %s..." % url)
             try:
                 request.urlretrieve(url, missingPath)
