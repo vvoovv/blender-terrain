@@ -1,8 +1,8 @@
 bl_info = {
     "name": "Import Terrain (.hgt)",
     "author": "Vladimir Elistratov <prokitektura+support@gmail.com>",
-    "version": (1, 1, 0),
-    "blender": (2, 7, 9),
+    "version": (1, 1, 1),
+    "blender": (2, 8, 1),
     "location": "File > Import > Terrain (.hgt)",
     "description" : "Import real world terrain data from files in the SRTM format (.hgt)",
     "warning": "",
@@ -13,15 +13,6 @@ bl_info = {
 }
 
 import os,sys
-
-def _checkPath():
-    path = os.path.dirname(__file__)
-    if path in sys.path:
-        sys.path.remove(path)
-    # make <path> the first one to search for a module
-    sys.path.insert(0, path)
-_checkPath()
-
 import bpy, mathutils
 # ImportHelper is a helper class, defines filename and invoke() function which calls the file selector
 from bpy_extras.io_utils import ImportHelper
@@ -29,8 +20,9 @@ from bpy_extras.io_utils import ImportHelper
 import struct, math, gzip
 from urllib import request
 
-from transverse_mercator import TransverseMercator
-from donate import Donate
+
+_isBlender280 = bpy.app.version[1] >= 80
+
 
 def getSrtmIntervals(x1, x2):
     """
@@ -140,12 +132,17 @@ class ImportTerrain(bpy.types.Operator, ImportHelper):
         description="Maximum longitude of the imported extent",
         default=0
     )
+    
+    def invoke(self, context, event):
+        # check if <bpyproj> is activated and is available in sys.modules
+        self.bpyproj = "bpyproj" in (context.preferences.addons if _isBlender280 else context.user_preferences.addons) and sys.modules.get("bpyproj")
+        return super().invoke(context, event)
 
     def execute(self, context):
         scene = context.scene
         projection = None
         if "lat" in scene and "lon" in scene and not self.ignoreGeoreferencing:
-            projection = TransverseMercator(lat=scene["lat"], lon=scene["lon"])
+            projection = self.getProjection(context, lat=scene["lat"], lon=scene["lon"])
         if self.useSelectionAsExtent:
             bbox = getSelectionBoundingBox(context)
             if not bbox or bbox["xmin"]>=bbox["xmax"] or bbox["ymin"]>=bbox["ymax"]:
@@ -177,7 +174,7 @@ class ImportTerrain(bpy.types.Operator, ImportHelper):
         # remember if we have georeferencing
         _projection = projection
         if not projection:
-            projection = TransverseMercator(lat=(minLat+maxLat)/2, lon=(minLon+maxLon)/2)
+            projection = self.getProjection(context, lat=(minLat+maxLat)/2., lon=(minLon+maxLon)/2.)
         srtm = Srtm(
             minLat=minLat,
             maxLat=maxLat,
@@ -213,18 +210,17 @@ class ImportTerrain(bpy.types.Operator, ImportHelper):
         if not _projection:
             scene["lat"] = projection.lat
             scene["lon"] = projection.lon
-        bpy.context.scene.objects.link(obj)
+        
+        if _isBlender280:
+            bpy.context.scene.collection.objects.link(obj)
+        else:
+            bpy.context.scene.objects.link(obj)
         
         return {"FINISHED"}
 
     def draw(self, context):
         layout = self.layout
-        
-        Donate.gui(
-            layout,
-            self.bl_label
-        )
-        
+                
         #row = layout.row()
         #row.prop(self, "resolution")
         
@@ -235,17 +231,17 @@ class ImportTerrain(bpy.types.Operator, ImportHelper):
         if self.useSpecificExtent:
             box = layout.box()
             
-            split = box.split(percentage=0.25)
+            split = box.split(factor=0.25) if _isBlender280 else box.split(percentage=0.25)
             split.label()
-            split.split(percentage=0.67).prop(self, "maxLat")
+            (split.split(factor=0.67) if _isBlender280 else split.split(percentage=0.67)).prop(self, "maxLat")
             
             row = box.row()
             row.prop(self, "minLon")
             row.prop(self, "maxLon")
             
-            split = box.split(percentage=0.25)
+            split = box.split(factor=0.25) if _isBlender280 else box.split(percentage=0.25)
             split.label()
-            split.split(percentage=0.67).prop(self, "minLat")
+            (split.split(factor=0.67) if _isBlender280 else split.split(percentage=0.67)).prop(self, "minLat")
         
         layout.separator()
         
@@ -263,6 +259,28 @@ class ImportTerrain(bpy.types.Operator, ImportHelper):
         row = layout.row()
         if self.useSelectionAsExtent: row.enabled = False
         row.prop(self, "ignoreGeoreferencing")
+        
+        if self.bpyproj:
+            self.bpyproj.draw(context, layout)
+    
+    def getProjection(self, context, lat, lon):
+        # get the coordinates of the center of the Blender system of reference
+        scene = context.scene
+        if "lat" in scene and "lon" in scene and not self.ignoreGeoreferencing:
+            lat = scene["lat"]
+            lon = scene["lon"]
+        else:
+            scene["lat"] = lat
+            scene["lon"] = lon
+        
+        projection = None
+        if self.bpyproj:
+            projection = self.bpyproj.getProjection(lat, lon)
+        if not projection:
+            from .transverse_mercator import TransverseMercator
+            # fall back to the Transverse Mercator
+            projection = TransverseMercator(lat=lat, lon=lon)
+        return projection
 
 
 class Srtm:
@@ -427,10 +445,14 @@ def menu_func_import(self, context):
 
 def register():
     bpy.utils.register_class(ImportTerrain)
-    bpy.utils.register_class(Donate)
-    bpy.types.INFO_MT_file_import.append(menu_func_import)
+    if _isBlender280:
+        bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
+    else:
+        bpy.types.INFO_MT_file_import.append(menu_func_import)
 
 def unregister():
     bpy.utils.unregister_class(ImportTerrain)
-    bpy.utils.unregister_class(Donate)
-    bpy.types.INFO_MT_file_import.remove(menu_func_import)
+    if _isBlender280:
+        bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
+    else:
+        bpy.types.INFO_MT_file_import.remove(menu_func_import)
