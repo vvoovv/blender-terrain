@@ -2,7 +2,7 @@ bl_info = {
     "name": "Import Terrain (.hgt)",
     "author": "Vladimir Elistratov <prokitektura+support@gmail.com>",
     "version": (1, 1, 1),
-    "blender": (2, 8, 1),
+    "blender": (2, 80, 0),
     "location": "File > Import > Terrain (.hgt)",
     "description" : "Import real world terrain data from files in the SRTM format (.hgt)",
     "warning": "",
