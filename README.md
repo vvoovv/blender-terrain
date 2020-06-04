@@ -1,3 +1,7 @@
+# Important!
+Terrain import is now a part of the blender-osm addon. Get it for free at https://gumroad.com/l/blender-osm. The source code is located [here](https://github.com/vvoovv/blender-osm/tree/release).
+
+
 # blender-terrain
 The addon for Blender imports real world terrain data with global coverage and the resolution about 30 meter in the SRTM format (.hgt).
 
